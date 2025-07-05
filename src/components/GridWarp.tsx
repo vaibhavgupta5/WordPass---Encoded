@@ -1,14 +1,47 @@
 "use client";
 
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
-import { useEffect } from "react";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  useSpring,
+} from "framer-motion";
+import { useEffect, useState } from "react";
 
 export default function GridWarp() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const rotateX = useTransform(mouseY, [0, window.innerHeight], [8, -8]);
-  const rotateY = useTransform(mouseX, [0, window.innerWidth], [-8, 8]);
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    // Set window size once on client
+    setWindowSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const rotateX = useTransform(
+    mouseY,
+    [0, windowSize.height || 1],
+    [8, -8]
+  );
+  const rotateY = useTransform(
+    mouseX,
+    [0, windowSize.width || 1],
+    [-8, 8]
+  );
 
   const smoothX = useSpring(rotateX, { stiffness: 50, damping: 20 });
   const smoothY = useSpring(rotateY, { stiffness: 50, damping: 20 });
@@ -34,7 +67,7 @@ export default function GridWarp() {
       initial={{ scale: 1, opacity: 1 }}
       animate={{
         scale: [1, 0.8, 1],
-        opacity: [1,1, 1],
+        opacity: [1, 1, 1],
       }}
       transition={{
         duration: 30,
@@ -42,7 +75,10 @@ export default function GridWarp() {
         ease: "linear",
       }}
     >
-      <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        className="w-full h-full"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <defs>
           <pattern
             id="grid"
@@ -53,7 +89,7 @@ export default function GridWarp() {
             <path
               d="M 40 0 L 0 0 0 40"
               fill="none"
-              stroke="rgba(255,255,255,0.3)" // More visible
+              stroke="rgba(255,255,255,0.3)"
               strokeWidth="1"
             />
           </pattern>
